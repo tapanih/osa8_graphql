@@ -1,0 +1,16 @@
+{
+  "name": "osa8_graphql",
+  "version": "1.0.0",
+  "description": "Osa 8: GraphQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node library-backend.js"
+  },
+  "author": "Tapani Honkanen",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.9.15",
+    "graphql": "^14.5.8"
+  }
+}
