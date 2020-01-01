@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { printIntrospectionSchema } from 'graphql'
 
 const Authors = ({ show, result, editAuthor }) => {
   const [ born, setBorn ] = useState('')

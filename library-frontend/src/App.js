@@ -10,8 +10,8 @@ const ALL_AUTHORS = gql`
     allAuthors {
       name
       born
-      bookCount
       id
+      bookCount
     }
   }
 `
@@ -20,7 +20,9 @@ const ALL_BOOKS = gql`
   {
     allBooks {
       title
-      author
+      author {
+        name
+      }
       published
       id
     }
@@ -37,7 +39,9 @@ const CREATE_BOOK = gql`
     ) {
       title
       published
-      author
+      author {
+        name
+      }
       genres
     }
   }
