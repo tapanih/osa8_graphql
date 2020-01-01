@@ -5,13 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node library-backend.js"
+    "start": "node library-backend.js",
+    "watch": "nodemon library-backend.js"
   },
   "author": "Tapani Honkanen",
   "license": "ISC",
   "dependencies": {
     "apollo-server": "^2.9.15",
+    "dotenv": "^8.2.0",
     "graphql": "^14.5.8",
+    "mongoose": "^5.8.3",
+    "mongoose-unique-validator": "^2.0.3",
     "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
   }
 }
