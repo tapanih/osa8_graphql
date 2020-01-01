@@ -1,9 +1,9 @@
 require('dotenv').config()
+const _ = require('lodash')
 const { ApolloServer, UserInputError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const Author = require('./models/author')
 const Book = require('./models/book')
-const uuid = require('uuid/v1')
 
 mongoose.set('useFindAndModify', false)
 
@@ -61,7 +61,21 @@ const resolvers = {
     allBooks: (root, args) => {
       return Book.find({}).populate('author', { name: 1 })
     },
-    allAuthors: () => Author.find({}),
+    allAuthors: async () => {
+      try {
+        const authors = await Author.find({})
+        const books = await Book.find({})
+        const booksOfAuthor = _.groupBy(books, b => b.author._id)
+        return authors.map(a => ({
+          id: a._id,
+          name: a.name,
+          born: a.born,
+          bookCount: booksOfAuthor[a._id].length
+        }))
+      } catch (error) {
+        console.log(error.message)
+      }
+    }
   },
   Mutation: {
     addBook: async (root, args) => {
@@ -100,11 +114,6 @@ const resolvers = {
       const updatedAuthor = { ...author, born: args.setBornTo }
       authors = authors.map(a => a.name === args.name ? updatedAuthor : a)
       return updatedAuthor
-    }
-  },
-  Author: {
-    bookCount: (root) => {
-      return books.filter(book => book.author === root.name).length
     }
   },
 }
