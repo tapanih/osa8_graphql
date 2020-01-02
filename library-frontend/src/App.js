@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
-import { useQuery, useMutation } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import LoginForm from './components/LoginForm'
 
 const ALL_AUTHORS = gql`
   {
@@ -56,8 +57,19 @@ const EDIT_AUTHOR = gql`
   }
 `
 
+const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password)  {
+      value
+    }
+  }
+`
+
 const App = () => {
+  const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
+
+  const client = useApolloClient()
 
   const handleError = (error) => {
     console.log(error.graphQLErrors[0].message)
@@ -65,6 +77,10 @@ const App = () => {
 
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+
+  const [login] = useMutation(LOGIN, {
+    onError: handleError
+  })
 
   const [addBook] = useMutation(CREATE_BOOK, {
     onError: handleError,
@@ -76,12 +92,25 @@ const App = () => {
     refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
+        {token ?
+        <>
+          <button onClick={() => setPage('add')}>add book</button>
+          <button onClick={logout}>logout</button>
+        </>
+        :
+          <button onClick={() => setPage('login')}>login</button>
+        }
       </div>
 
       <Authors
@@ -100,6 +129,11 @@ const App = () => {
         addBook={addBook}
       />
 
+      <LoginForm
+        show={page === 'login'}
+        login={login}
+        setToken={(token) => setToken(token)}
+      />
     </div>
   )
 }
