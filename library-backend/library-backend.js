@@ -1,6 +1,6 @@
 require('dotenv').config()
 const _ = require('lodash')
-const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
 const mongoose = require('mongoose')
 const Author = require('./models/author')
 const Book = require('./models/book')
@@ -105,7 +105,12 @@ const resolvers = {
     }
   },
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+
+      if (!context.currentUser) {
+        throw new AuthenticationError("not authenticated")
+      }
+
       const authorExists = await Author
         .collection
         .countDocuments({ name: args.author }, {limit: 1})
@@ -133,7 +138,12 @@ const resolvers = {
 
       return book
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+
+      if (!context.currentUser) {
+        throw new AuthenticationError("not authenticated")
+      }
+
       const author = await Author.findOne({ name: args.name })
       if (!author) {
         return null
