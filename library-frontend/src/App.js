@@ -26,6 +26,7 @@ const ALL_BOOKS = gql`
       }
       published
       id
+      genres
     }
   }
 `
@@ -118,7 +119,6 @@ const App = () => {
         result={authors}
         editAuthor={editAuthor}
       />
-
       <Books
         show={page === 'books'}
         result={books}
