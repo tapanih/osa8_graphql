@@ -93,6 +93,19 @@ const App = () => {
     console.log(error.graphQLErrors[0].message)
   }
 
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) =>
+      set.map(book => book.title).includes(object.title)
+
+    const dataInStore = client.readQuery({ query: ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      client.writeQuery({
+        query: ALL_BOOKS,
+        data: { allBooks: dataInStore.allBooks.concat(addedBook) }
+      })
+    }
+  }
+
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
 
@@ -102,7 +115,10 @@ const App = () => {
 
   const [addBook] = useMutation(CREATE_BOOK, {
     onError: handleError,
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook)
+    },
+    refetchQueries: [{ query: ALL_AUTHORS }]
   })
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
@@ -114,6 +130,7 @@ const App = () => {
     onSubscriptionData: ({ subscriptionData }) => {
       const addedBook = subscriptionData.data.bookAdded
       window.alert(`${addedBook.title} added`)
+      updateCacheWith(addedBook)
     }
   })
 
