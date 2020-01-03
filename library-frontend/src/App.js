@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
-import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient, useSubscription } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
@@ -18,18 +18,25 @@ const ALL_AUTHORS = gql`
   }
 `
 
+const BOOK_DETAILS = gql`
+fragment BookDetails on Book {
+  title
+  author {
+    name
+  }
+  published
+  id
+  genres
+}
+`
+
 const ALL_BOOKS = gql`
   {
     allBooks {
-      title
-      author {
-        name
-      }
-      published
-      id
-      genres
+      ...BookDetails
     }
   }
+${BOOK_DETAILS}
 `
 
 const CREATE_BOOK = gql`
@@ -67,6 +74,16 @@ const LOGIN = gql`
   }
 `
 
+const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+    }
+  }
+${BOOK_DETAILS}
+`
+
+
 const App = () => {
   const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
@@ -92,6 +109,12 @@ const App = () => {
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     onError: handleError,
     refetchQueries: [{ query: ALL_AUTHORS }]
+  })
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      console.log(subscriptionData)
+    }
   })
 
   const logout = () => {
