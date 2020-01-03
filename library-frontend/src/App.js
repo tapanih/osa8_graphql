@@ -25,7 +25,6 @@ fragment BookDetails on Book {
     name
   }
   published
-  id
   genres
 }
 `
@@ -113,7 +112,8 @@ const App = () => {
 
   useSubscription(BOOK_ADDED, {
     onSubscriptionData: ({ subscriptionData }) => {
-      console.log(subscriptionData)
+      const addedBook = subscriptionData.data.bookAdded
+      window.alert(`${addedBook.title} added`)
     }
   })
 
