@@ -35,7 +35,7 @@ const Books = ({ show, result }) => {
       }
     }
     fetchData(genre)
-  }, [genre, client, result.data.allBooks])
+  }, [genre, client, result])
 
   if (!show) {
     return null

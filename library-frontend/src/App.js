@@ -4,6 +4,7 @@ import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import Recommendations from './components/Recommendations'
 import LoginForm from './components/LoginForm'
 
 const ALL_AUTHORS = gql`
@@ -107,6 +108,7 @@ const App = () => {
         {token ?
         <>
           <button onClick={() => setPage('add')}>add book</button>
+          <button onClick={() => setPage('recommend')}>recommend</button>
           <button onClick={logout}>logout</button>
         </>
         :
@@ -127,6 +129,11 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         addBook={addBook}
+      />
+
+      <Recommendations
+        show={page === 'recommend'}
+        result={books}
       />
 
       <LoginForm
