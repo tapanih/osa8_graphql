@@ -7,6 +7,9 @@ const Book = require('./models/book')
 const User = require('./models/user')
 const jwt = require('jsonwebtoken')
 
+const { PubSub } = require('apollo-server')
+const pubsub = new PubSub()
+
 mongoose.set('useFindAndModify', false)
 mongoose.set('useUnifiedTopology', true)
 
@@ -75,6 +78,10 @@ const typeDefs = gql`
       password: String!
     ): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `
 
 const resolvers = {
@@ -135,8 +142,10 @@ const resolvers = {
           invalidArgs: args
         })
       }
+      const bookWithAuthor = {...args, author: { name: author.name }}
+      pubsub.publish('BOOK_ADDED', { bookAdded: bookWithAuthor })
 
-      return book
+      return bookWithAuthor
     },
     editAuthor: async (root, args, context) => {
 
@@ -186,6 +195,11 @@ const resolvers = {
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     }
   },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    },
+  }
 }
 
 const server = new ApolloServer({
@@ -203,6 +217,7 @@ const server = new ApolloServer({
   }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`)
 })
